@@ -1,5 +1,5 @@
 <?php
-namespace Core;
+namespace core;
 /**
  * 多进程服务器
  *
@@ -13,17 +13,24 @@ class MultiProcessServer {
     protected $child_num = 0;
     protected $is_parent = true;
     protected $children = array();
+    protected $children_load = array();
+    protected $children_queue = array();
     protected $die = false;
     protected $group = null;
     protected $user = null;
     protected $gid = null;
     protected $uid = null;
+    protected $msg_queue = null;
+    protected $name = null;
 
     function __construct($num = 0,$user = null,$group = null) {
         $this->child_num = $num == 0 ? self::INIT_CHILD_NUM : $num;
         $this->children = array();
+        $this->children_queue = array();
+        $this->children_load = array('manager');
         $this->die = false;
         $this->is_parent = true;
+        $this->msg_queue= msg_get_queue(ftok(dirname(__FILE__),  basename(__FILE__)));
         if(!empty($user)){
             $this->user = $user;
             $uinfo = posix_getpwnam($user);
@@ -35,6 +42,10 @@ class MultiProcessServer {
             $ginfo = posix_getgrnam($group);
             $this->gid = $ginfo['gid'];
         }
+    }
+    
+    function setName($name){
+        $this->name = $name;
     }
 
     function start() {
@@ -79,7 +90,12 @@ class MultiProcessServer {
     }
 
     function job() {
-        
+        if($this->name == 'manager'){
+            $runner = new Manager($this);
+        }else{
+//            $runner = new \app\$this->name();
+        }
+        $runner->run();
     }
     
     function childInit() {
@@ -87,10 +103,11 @@ class MultiProcessServer {
     }
 
     function createChildren($num = self::INIT_CHILD_NUM) {
-        for ($i = 0; $i < $num; ++$i) {
+        foreach ($this->children_load as $loadname) {
             $pid = pcntl_fork();
             if ($pid == 0) {
                 $this->is_parent = false;
+                $this->setName($loadname);
                 $this->children = array();
                 $this->childInit();
                 if(!empty($this->gid)){

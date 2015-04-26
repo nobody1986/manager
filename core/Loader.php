@@ -1,6 +1,6 @@
 <?php
 
-namespace Core;
+namespace core;
 
 /**
  * Description of Loader
@@ -16,12 +16,12 @@ class Loader {
             if (empty(self::$_loadeds[$classname])) {
                 $classname = trim($classname,'\\');
                 $classname = str_replace('\\', DIRECTORY_SEPARATOR, $classname);
-                $classpath = MANAGER_ROOT . $classname;
+                $classpath = MANAGER_PATH . $classname . '.php';
                 if (file_exists($classpath)) {
                     require($classpath);
                     self::$_loadeds[$classname] = true;
                 } else {
-                    $classpath = THIRD_LIB_PATH . $classname;
+                    $classpath = THIRD_LIB_PATH . $classname . '.php';
                     if (file_exists($classpath)) {
                         require($classpath);
                         self::$_loadeds[$classname] = true;

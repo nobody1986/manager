@@ -1,12 +1,11 @@
 <?php
-
+namespace core\httpd;
 /**
  * 基于lievent的httpserver 单进程
  *
  * @author ye
  */
 
-namespace http;
 
 $path = dirname(__FILE__);
 require("{$path}/Server.php");

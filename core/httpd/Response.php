@@ -6,7 +6,7 @@
  * @author ye
  */
 
-namespace http;
+namespace core\httpd;
 
 class Response {
 
